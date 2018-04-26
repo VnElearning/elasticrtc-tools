@@ -46,7 +46,7 @@ cd elasticrtc-tools/tools
 Build your first cluster
 ```
 ./elasticrtc create \
-   --region ap-southeast-1  \
+   --region eu-west-1 \
    --stack-name mycluster
 ```
 where

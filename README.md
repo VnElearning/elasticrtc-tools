@@ -1,22 +1,29 @@
 ElasticRTC tools
-=============
+==================
 
 ElasticRTC is a cluster infrastructure based in Kurento Media Server and Amazon Web Services (AWS), that provides following capabilities:
 
 * **Easy to deploy**: Straightforward deployment of any number of nodes.
 * **Versioning**: Select what version of Kurento Media Server you want to deploy
-* **Security**: Out of the box security, including SSL and access control.
 * **Monitoring**: Deployed with ElasticRTC Inspector. An application intended to dig into pipeline topology, to monitor and to get statistics from every single media element.
+* **Security**: Out of the box security, including SSL and access control.
 
 # Getting started
 
-In order to use ElasticRTC you’ll need to [Signup for an Amazon Web Services (AWS) account](http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/signup.html). If you already have one you can skip this step.
+## Prerequired
 
-You will need Python installed in your machine. Verify your current version or install from [Python site](https://www.python.org/downloads/).
+First, In order to use ElasticRTC you’ll need to [Signup for an Amazon Web Services (AWS) account](http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/signup.html). If you already have one you can skip this step.
+
+2. You will need Python 2.x installed on your machine. Verify your current version or install from [Python site](https://www.python.org/downloads/).
 ```
 python -V
 ```
 Execute following commands as administrator in order to install required Python modules. Following [instructions](https://pip.pypa.io/en/stable/installing/) will help you to install pip if it is not yet available in your system.
+
+```
+pip -V
+```
+Please make sure you have pip version > 10.0.x installed, if not please upgrade as following (https://pip.pypa.io/en/stable/installing/) 
 ```
 sudo pip install boto3
 sudo pip install pyOpenSSL
@@ -39,7 +46,7 @@ cd elasticrtc-tools/tools
 Build your first cluster
 ```
 ./elasticrtc create \
-   --region eu-west-1 \
+   --region ap-southeast-1  \
    --stack-name mycluster
 ```
 where
@@ -499,7 +506,7 @@ to deploy ElasticRTC. You'll need to create a policy with this access rights and
 
  ```
 {
-    "Version": "2012-10-17",
+    "Version": "2018-04-25",
     "Statement": [
         {
             "Effect": "Allow",
@@ -565,7 +572,7 @@ to deploy ElasticRTC. You'll need to create a policy with this access rights and
 Above policy will allow users to create ElastiRTC clusters, but is you require these users to be able to delete them, you'll need to add also following policy
 ```
 {
-    "Version": "2012-10-17",
+    "Version": "2018-04-25",
     "Statement": [
         {
             "Effect": "Allow",
@@ -825,7 +832,7 @@ ERROR: Unable to validate S3 bucket name
 In order to fix this problem you'll need to add following policy to AWS user.
 ```
   {
-    "Version": "2012-10-17",
+    "Version": "2018-04-25",
     "Statement": [
         {
             "Effect": "Allow",

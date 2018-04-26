@@ -1,5 +1,5 @@
 {
-  "Description" : "Kurento cluster CloudFormation template",
+  "Description" : "Kurento Cluster CloudFormation template",
 
   "Metadata" : {
     "AWS::CloudFormation::Interface" : {
@@ -67,7 +67,8 @@
 
     "KeyName" : {
       "Description" : "[Mandatory] SSH access key for cluster nodes",
-      "Type": "AWS::EC2::KeyPair::KeyName"
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
     },
 
     "InstanceType" : {
@@ -81,18 +82,19 @@
         "m4.large",
         "m4.xlarge",
         "m4.2xlarge",
-        "m4.4xlarge",
-        "m4.10xlarge",
+        "m5.large",
+        "m5.xlarge",
+        "m5.2xlarge",
         "c3.large",
         "c3.xlarge",
         "c3.2xlarge",
-        "c3.4xlarge",
-        "c3.8xlarge",
         "c4.large",
         "c4.xlarge",
         "c4.2xlarge",
-        "c4.4xlarge",
-        "c4.8xlarge"
+        "c5.large",
+        "c5.xlarge",
+        "c5.2xlarge"
+
       ],
       "Default" : "m3.medium"
     },
@@ -212,7 +214,7 @@
       "Description" : "Specifies log storage for cluster",
       "Type" : "String",
       "AllowedValues" : [ "cloudwatch" , "s3" ,"elasticsearch", "none" ],
-      "Default" : "none"
+      "Default" : "cloudwatch"
     },
 
     "ElasticSearchTransport" : {
@@ -438,13 +440,13 @@
             "files" : { "Fn::If": [ "IsSsl",
                 {
                   "/etc/ssl/kurento.crt" : {
-                    "source" : { "Fn::Join" : ["", [ "http://", { "Ref" : "S3Bucket" }, ".s3.amazonaws.com/", { "Ref" : "SslCertificate"} ]]},
+                    "source" : { "Fn::Join" : ["", [ "https://", { "Ref" : "S3Bucket" }, ".s3.amazonaws.com/", { "Ref" : "SslCertificate"} ]]},
                     "authentication" : "S3Access",
                     "owner" : "root",
                     "mode" : "000600"
                   },
                   "/etc/ssl/kurento.key" : {
-                    "source" : { "Fn::Join" : ["", [ "http://", { "Ref" : "S3Bucket" }, ".s3.amazonaws.com/", { "Ref" : "SslKey"} ]]},
+                    "source" : { "Fn::Join" : ["", [ "https://", { "Ref" : "S3Bucket" }, ".s3.amazonaws.com/", { "Ref" : "SslKey"} ]]},
                     "authentication" : "S3Access",
                     "owner" : "root",
                     "mode" : "000600"
@@ -694,7 +696,7 @@
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
-          "Version" : "2012-10-17",
+          "Version" : "2018-04-25",
           "Statement": [ {
             "Effect": "Allow",
             "Principal": {
@@ -711,7 +713,7 @@
         {
           "PolicyName": "S3Storage",
           "PolicyDocument": {
-            "Version" : "2012-10-17",
+            "Version" : "2018-04-25",
             "Statement": [
               {
                 "Effect": "Allow",
@@ -737,7 +739,7 @@
         {
           "PolicyName": "Route53",
           "PolicyDocument": {
-            "Version" : "2012-10-17",
+            "Version" : "2018-04-25",
             "Statement": [
               {
                 "Effect": "Allow",
@@ -754,7 +756,7 @@
         {
           "PolicyName": "HzAutodiscovery",
           "PolicyDocument": {
-            "Version" : "2012-10-17",
+            "Version" : "2018-04-25",
             "Statement": [ {
               "Effect": "Allow",
               "Action": "ec2:Describe*",
@@ -765,7 +767,7 @@
         {
           "PolicyName": "AwsAutoscaling",
           "PolicyDocument": {
-            "Version" : "2012-10-17",
+            "Version" : "2018-04-25",
             "Statement": [
               {
                 "Effect": "Allow",
@@ -796,7 +798,7 @@
         {
           "PolicyName": "Logging",
           "PolicyDocument": {
-            "Version" : "2012-10-17",
+            "Version" : "2018-04-25",
             "Statement": [
               {
                 "Effect": "Allow",

@@ -64,14 +64,14 @@ CR = "\n"
 I = "     "
 I2 = I+I
 I3 = I2+ "          "
-CMD = "usage: " + os.path.basename(__file__) + " "
+CMD = "usage: " + os.path.basename(__file__) + " - "
 CMD_CREATE = "create"
 CMD_DELETE = "delete"
 CMD_LIST = "list"
 CMD_SHOW = "show"
 CMD_UPDATE = "update"
 CMD_VERSION = "version"
-CMDS = [ CMD_CREATE, CMD_DELETE, CMD_UPDATE, CMD_LIST, CMD_SHOW, CMD_VERSION ]
+CMDS = [ CMD_CREATE, CMD_DELETE, CMD_UPDATE, CMD_LIST, CMD_SHOW, CMD_VERSION]
 
 PARAM_APP_URL = "app-url"
 PARAM_AWS_ACCESS_KEY_ID = "aws-access-key-id"
@@ -128,7 +128,7 @@ USAGE_DELETE_CMD = I2 + CMD_DELETE + "  Delete elasticRTC Cluster." + CR
 USAGE_LIST_CMD =   I2 + CMD_LIST + "    List elasticRTC Clusters." + CR
 USAGE_SHOW_CMD =   I2 + CMD_SHOW + "    Show elasticRTC Cluster details." + CR
 USAGE_SHOW_CMD =   I2 + CMD_UPDATE + "    Updates an already existing elasticRTC Cluster." + CR
-USAGE_VERSION_CMD= I2 + CMD_VERSION + " List available version in region." + CR
+USAGE_VERSION_CMD = I2 + CMD_VERSION + " List available version in region." + CR
 USAGE_HELP_CMD = CR+I2 + "See '" + os.path.basename(__file__) + " help COMMAND' for help on a specific command." + CR
 
 USAGE_AWS_ACCESS_KEY_ID = (CR+I2+ "--" + PARAM_AWS_ACCESS_KEY_ID + " value"
@@ -320,9 +320,8 @@ USAGE_SCALE_POLICY = (CR+I2 + "--" + PARAM_SCALE_IN_POLICY + "key=val[,key=val .
     +CR)
 
 USAGE_STACK_NAME = (CR+I2+ "--" + PARAM_STACK_NAME + " value"
-    +CR+I3+ "[Mandatory] Cluster name. It must start with letter, contain only"
-    +CR+I3+ "alphanumeric characters and be unique in selected region. White"
-    +CR+I3+ "spaces are not allowed."
+    +CR+I3+ "[Mandatory] A stack name can contain only alphanumeric characters (case-sensitive) and hyphens. "
+    +CR+I3+ "A stack name can contain only alphanumeric characters (case-sensitive) and hyphens."
     +CR)
 
 USAGE_SSL = (CR+I2+ "--" + PARAM_SSL_CERT + " path"
@@ -435,7 +434,9 @@ USAGE_VERSION=(USAGE_CLI_VERSION
              )
 
 ALPHANUMERIC_KURENTO_API_KEY = PARAM_KURENTO_API_KEY + " name must be an alphanumeric string"
-ALPHANUMERIC_STACK_NAME = "Stack name must be an alphanumeric string"
+INVALID_ALPHANUMERIC_STACK_NAME = "Stack name can contain only alphanumeric characters (case-sensitive) and hyphens."
+INVALID_ENDWITH_HYPEN_STACK_NAME = "Stack name cannot end with hypen"
+INVALID_LENGTH_STACK_NAME = "Stack name cannot be longer than 128 characters."
 MISSING_REGION = "Missing mandatory parameter --" + PARAM_REGION
 MISSING_STACK_NAME = "Missing mandatory parameter --" + PARAM_STACK_NAME
 MISSING_AWS_KEY_NAME = "Missing mandatory parameter --" + PARAM_AWS_KEY_NAME
@@ -711,7 +712,7 @@ class KurentoClusterConfig:
                 CMD_LIST : USAGE_LIST,
                 CMD_SHOW : USAGE_SHOW,
                 CMD_UPDATE : USAGE_UPDATE,
-                CMD_VERSION : USAGE_VERSION
+                CMD_VERSION : USAGE_VERSION,
                 }[command]
         except Exception as e:
             usage ("Unknown command: " + command , USAGE_ALL)
@@ -726,15 +727,16 @@ class AwsSession:
         self._create_aws_session()
 
     def _create_aws_session (self):
+       
         try:
             if self.config.aws_access_key_id is None or self.config.aws_secret_access_key is None:
                 self._get_aws_configuration()
-                self._select_aws_credentials ()
-            self.aws_session = boto3.Session(aws_access_key_id = self.config.aws_access_key_id,
+                self._select_aws_credentials()
+            self.aws_session = boto3.session.Session(aws_access_key_id = self.config.aws_access_key_id,
                             aws_secret_access_key = self.config.aws_secret_access_key,
                             region_name = self.config.region)
         except Exception as e:
-            log_error("Unable to create AWS session\n\n   " + str(e))
+            log_error("Unable to create AWS session\n   " + str(e))
 
     def _select_aws_credentials (self):
         # Single profile
@@ -767,7 +769,7 @@ class AwsSession:
                 aws_config.read(location)
                 self._get_aws_credentials(aws_config)
         if len(self.aws_credentials) == 0:
-            aws_config = self._gather_aws_credentials ()
+            aws_config = self._gather_aws_credentials()
             self._get_aws_credentials(aws_config)
 
     def _get_aws_credentials (self,aws_config):
@@ -792,12 +794,12 @@ class AwsSession:
               "AWS credentials not configured. Access and secret keys must be \n"
               "provided in order to allow Kurento tools to access AWS APIs.\n"
               "\n"
-              "If you're the account administrator execute following procedure:\n"
+              "Solution 1 : If you're the account administrator execute following procedure:\n"
               "  1 - Navigate to https://console.aws.amazon.com/iam/home?#security_credential\n"
               "  2 - Open section Access Keys (Access Key ID and Secret Access Key)\n"
               "  3 - Press button Create New Access Key\n"
               "\n"
-              "If you're not the account administrator you still can generate credentials\n"
+              "Solution 2 : If you're not the account administrator you still can generate credentials\n"
               "with following procedure\n"
               "  1 - Navigate to https://myaccount.signin.aws.amazon.com/console. Your AWS\n"
               "      administrator will provide you the value for myaccount\n"
@@ -842,6 +844,7 @@ class KurentoCluster:
         # Record basic config
         self.config = config
         self.session = session
+
         # Create AWS clients
         try:
             self.aws_cf = self.session.client('cloudformation')
@@ -850,7 +853,7 @@ class KurentoCluster:
             self.aws_route53 = self.session.client('route53')
             self.aws_s3 = self.session.client('s3')
         except Exception as e:
-            log_error("Unable to create AWS client\n\n   " + str(e))
+            log_error("Unable to create AWS client\n   " + str(e))
 
         # Validate configuration
         self._validate_mandatory_parameters()
@@ -868,13 +871,17 @@ class KurentoCluster:
 
     def _validate_mandatory_parameters (self):
         if self.config.region is None:
-            usage (MISSING_REGION, USAGE_REGION )
+            usage (MISSING_REGION, USAGE_REGION)
 
     def _validate_mandatory_parameters_stack (self):
         if self.config.stack_name is None:
             usage (MISSING_STACK_NAME, USAGE_STACK_NAME)
-        if not self.config.stack_name.isalnum():
-            usage (ALPHANUMERIC_STACK_NAME,USAGE_STACK_NAME)
+        if not re.match("^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$", self.config.stack_name):
+            usage (INVALID_ALPHANUMERIC_STACK_NAME, USAGE_STACK_NAME)
+        if self.config.stack_name.endswith("-"):
+            usage (INVALID_ENDWITH_HYPEN_STACK_NAME, USAGE_STACK_NAME)
+        if len(self.config.stack_name) >= 128:
+            usage (INVALID_LENGTH_STACK_NAME, USAGE_STACK_NAME)
 
     def _validate_mandatory_parameters_create (self):
         if os.path.exists(self.config.template_file):
@@ -1162,6 +1169,7 @@ class KurentoCluster:
                 if image['OwnerId'] != "135888621974":
                     continue
                 # Get image version
+                print('Image name: ',image['Name'])
                 version = re.search("KMS-(?P<version>\d+\.\d+\.\d+\S*)\.trusty",image['Name']).group('version')
                 creation_ts = int(datetime.datetime.strptime(re.sub('\..*?$','',image['CreationDate']),"%Y-%m-%dT%H:%M:%S").strftime("%s"))
                 #print "FOUND: " + str(version) + " at: " + str(creation_ts) + " from: " + image['OwnerId']
@@ -1385,7 +1393,7 @@ class KurentoCluster:
         self._show()
 
     def _delete (self):
-        log ("Delete CloudFormation stack: " + self.config.stack_name )
+        log ("Deleting CloudFormation stack: " + self.config.stack_name )
         blank = open(os.devnull, 'w')
         stdout=sys.stdout
         try:
@@ -1404,7 +1412,7 @@ class KurentoCluster:
         self._wait_cf_cmd('DELETE_IN_PROGRESS', 'DELETE_COMPLETE', 'Deleting cluster')
 
     def _update (self):
-        log ("Update CloudFormation stack: " + self.config.stack_name )
+        log ("Updating CloudFormation stack: " + self.config.stack_name )
         # Get current stack
         stack = self._describe_stack ()
         self.default_params = stack['parameters']
@@ -1564,7 +1572,7 @@ class KurentoCluster:
         if out_json == True:
             res_str = json.dumps(res_obj)
         print res_str
-
+        
     def execute (self):
         if self.config.command == CMD_CREATE:
             self._create()

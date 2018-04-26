@@ -1,5 +1,5 @@
 {
-  "Description" : "Kurento cluster CloudFormation template",
+  "Description" : "Kurento Cluster CloudFormation template",
 
   "Parameters" : {
 
@@ -35,7 +35,7 @@
     },
 
     "MaxCapacity" : {
-      "Description" : "Maximin number of KMS instances in cluster",
+      "Description" : "Maximum number of KMS instances in cluster",
       "Type" : "Number",
       "MinValue" : "1",
       "MaxValue" : "100"
@@ -888,7 +888,7 @@
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
-          "Version" : "2012-10-17",
+          "Version" : "2018-04-25",
           "Statement": [ {
             "Effect": "Allow",
             "Principal": {
@@ -905,7 +905,7 @@
           {
             "PolicyName": "S3Storage",
             "PolicyDocument": {
-              "Version" : "2012-10-17",
+              "Version" : "2018-04-25",
               "Statement": [
                 {
                   "Effect": "Allow",
@@ -934,7 +934,7 @@
               {
                 "PolicyName": "S3StorageTest",
                 "PolicyDocument": {
-                  "Version" : "2012-10-17",
+                  "Version" : "2018-04-25",
                   "Statement": [
                     {
                       "Effect": "Allow",
@@ -955,7 +955,7 @@
           {
             "PolicyName": "Route53",
             "PolicyDocument": {
-              "Version" : "2012-10-17",
+              "Version" : "2018-04-25",
               "Statement": [
                 {
                   "Effect": "Allow",
@@ -972,7 +972,7 @@
           {
             "PolicyName": "HzAutodiscovery",
             "PolicyDocument": {
-              "Version" : "2012-10-17",
+              "Version" : "2018-04-25",
               "Statement": [ {
                 "Effect": "Allow",
                 "Action": "ec2:Describe*",
@@ -983,7 +983,7 @@
           {
             "PolicyName": "AwsAutoscaling",
             "PolicyDocument": {
-              "Version" : "2012-10-17",
+              "Version" : "2018-04-25",
               "Statement": [
                 {
                   "Effect": "Allow",
@@ -1014,7 +1014,7 @@
           {
             "PolicyName": "Logging",
             "PolicyDocument": {
-              "Version" : "2012-10-17",
+              "Version" : "2018-04-25",
               "Statement": [
                 {
                   "Effect": "Allow",
